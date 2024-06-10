@@ -3,7 +3,7 @@
 This is the codebase for building the custom dataset used for the study presented in the publication, [Time-series neural networks to predict electromagnetic wave propagation](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/13042/1304206/Time-series-neural-networks-to-predict-electromagnetic-wave-propagation/10.1117/12.3013488.full).
 
 __________________________________
-
+## Running from a local Docker container
 
 A library of 3x3 pillar radii between 75 nm and 250 nm is generated using [generate_radii.py](radii/generate_radii.py). This generates a file called `neighbors_library_allrandom.pkl`. This file stores a numpy array with len(5000). Each index contains a list of 9 radii. 
 
