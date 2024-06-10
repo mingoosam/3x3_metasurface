@@ -22,7 +22,7 @@ spec:
                 cd general_3x3;
                 git checkout andy_branch;
                 echo checkout out branch successfully for job {{job_name}} >> {{path_logs}}/test.log;
-                python3 preprocess_data.py >> {{path_logs}}/preprocess.log"]
+                python3 reduce_data.py >> {{path_logs}}/preprocess.log"]
           resources:
             limits:
               memory: {{num_mem_lim}}
