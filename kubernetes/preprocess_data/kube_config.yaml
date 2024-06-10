@@ -1,0 +1,27 @@
+## config file for preprocessing data, aka moving from full volumes with buffers to 
+## reduced volumes
+
+path_image: docker.io/kovaleskilab/meep:v3_lightning
+path_template: kube_files/templates/job.txt
+
+path_logs: /develop/results/current_logs
+path_sim_job_files: /develop/results/job_files
+
+# for slicing
+num_mem_lim: 150G
+num_mem_req: 100G
+num_cpus: 4 
+num_parallel_ops : 1
+
+
+namespace: gpn-mizzou-muem
+kill_time_min: 30
+kill_tag: preprocess
+
+# Define Simulation
+
+#num_sims: 1000 # this is the ending index
+#start_group_id: 247 
+
+pvc_data: meep-dataset-v2
+pvc_results: dft-volumes 

@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rclone-copy
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: rclone-copy
+          image: rclone/rclone
+          workingDir: /develop/results
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RCLONE_CONFIG_NAUTILUS_TYPE
+              value: s3
+            - name: RCLONE_CONFIG_NAUTILUS_ENDPOINT
+              value: http://rook-ceph-rgw-centrals3.rook-central
+            - name: RCLONE_CONFIG_NAUTILUS_PROVIDER
+              value: Other
+            - name: RCLONE_CONFIG_NAUTILUS_ACCESS_KEY_ID
+              value: JPKIHDAZY41Q5IPG1SPM
+            - name: RCLONE_CONFIG_NAUTILUS_SECRET_ACCESS_KEY
+              value: 2AZNOB1ivWEGKV1UYK6HDb5KuEJJ0s5dxDBxQPEE
+          command:
+            [ "rclone", "copy", "--progress", "--copy-links", "--transfers=16",
+              "/develop/results/{folder_num}/epsdata_{sim_num}.pkl/", "nautilus:andys-bucket/{folder_num}/epsdata_{sim_num}.pkl", ]
+          resources:
+            limits:
+              memory: 8Gi
+              cpu: 16
+            requests:
+              memory: 8Gi
+              cpu: 16
+          volumeMounts:
+            - name: meep-dataset-v2
+              mountPath: /develop/results
+      volumes:
+        - name: meep-dataset-v2
+          persistentVolumeClaim:
+            claimName: training-results

@@ -1,0 +1,39 @@
+{# kube_files/templates/job.txt #}
+apiVersion: batch/v1
+kind: Job 
+metadata:
+  name: {{job_name}}
+  namespace: gpn-mizzou-muem 
+spec:
+  completions: 1
+  backoffLimit: 0
+  template:
+    metadata:
+      name: {{job_name}}
+      namespace: gpn-mizzou-muem
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: {{job_name}}
+          image: {{path_image}}
+          command: ["/bin/sh", "-c"]
+          args: ["git clone https://github.com/Kovaleski-Research-Lab/general_3x3.git; 
+                cd general_3x3;
+                git checkout andy_branch;
+                echo checkout out branch successfully for job {{job_name}} >> {{path_logs}}/test.log;
+                mpirun --allow-run-as-root -np {{num_cpus}} python3 main.py -config configs/config.yaml -idx {{n_index}} >> {{path_logs}}/{{n_index}}.log"]
+          resources:
+            limits:
+              memory: {{num_mem_lim}}
+              cpu: {{num_cpus}}
+            requests:
+              memory: {{num_mem_req}}
+              cpu: {{num_cpus}}
+          volumeMounts:
+            - name: {{pvc_name}}
+              mountPath: /develop/results
+      volumes:
+        - name: {{pvc_name}} 
+          persistentVolumeClaim:
+            claimName: {{pvc_name}} 
+      

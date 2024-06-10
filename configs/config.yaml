@@ -1,0 +1,172 @@
+#---------------------------------------------------------
+#    Define task - 0: Generate data, 1: Preprocess data
+#    Define deployment mode - 0: Running locally, 1: kubernetes
+#----------------------------------------------------------
+
+task : 1
+deployment_mode : 0
+idx :
+
+#-----------------------------------
+#       'Local' paths (not kube)
+#-----------------------------------
+
+paths :
+  data : /develop/data/meep-dataset-v2
+  dump : /develop/data/meep-dataset-v2/volumes
+  library : /develop/code/general_3x3/radii/neighbors_library_allrandom.pkl 
+#------------------------
+#   General Parameters
+#-------------------------
+
+cell_x :
+cell_y : 
+cell_z :
+
+grid_size : 3
+
+#------------------------
+#   Geometry Parameters
+#-------------------------
+
+geometry:
+  #Fused silica
+  loc_x_fused_silica: 
+  loc_y_fused_silica: 
+  loc_z_fused_silica: 
+
+  size_x_fused_silica: 
+  size_y_fused_silica: 
+  size_z_fused_silica: 0.78
+
+  material_index_fused_silica: 1.44
+
+  #PDMS
+  loc_x_pdms:
+  loc_y_pdms:
+  loc_z_pdms:
+  
+  size_x_pdms:
+  size_y_pdms:
+  size_z_pdms: 1.56
+
+  material_index_pdms: 1.4
+
+  #Buffer
+  substrate_buffer: True
+  size_x_buffer: 4
+  size_y_buffer: 4
+  size_z_buffer: 1.5
+
+  #Metasurface
+  neighborhood_size: [3,3] #nx,ny
+
+  atom_type: 'cylinder'
+  material_index_meta_atom : 3.48 #amorphous silica
+  unit_cell_size: 0.68
+  height_pillar: 1.02
+  radius_pillar:
+  radius_min: 0.075
+  radius_max: 0.250
+
+
+  #Boundaries
+  thickness_pml: 0.78
+
+#-----------------------
+#   Source Parameters
+#-----------------------
+
+source:
+  type: 'gaussian'
+  frequency:
+  wavelength: 1.55
+  loc_x_source:
+  loc_y_source:
+  loc_z_source:
+  size_x_source: 
+  size_y_source:
+  size_z_source: 0 
+  fwidth: 
+  fcen:
+  component:
+  wavelength_list: [2.881, 1.650, 1.550, 1.300, 1.060]
+
+#-----------------------
+#   Monitor Parameters
+#-----------------------
+
+monitor:
+  components_dft_monitor: 'all'
+  fcen:
+  freq_list:
+  wavelenth_center: 1.55
+  wavelength_list: [2.881, 1.650, 1.550, 1.300, 1.060]
+
+dft_slice_monitor:
+  components_dft_monitor: 'all'
+  fcen:
+  freq_list:
+  wavelenth_center: 1.55
+  wavelength_list: [2.881, 1.650, 1.550, 1.300, 1.060]
+  loc_z: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4.0]
+
+#------------------------
+#   Simulation Parameters
+#-------------------------
+simulation:
+  until : 18
+  resolution : 80
+  decay_rate : 0.0015
+  dt : 50
+  source_component:
+  center_mon_z: 
+
+
+#-----------------------
+#  Animation Params
+#----------------------
+
+plot_plane :
+fps : 20
+
+#-----------------------
+# Kubernetes params 
+#----------------------
+
+kube :
+  namespace: gpn-mizzou-muem
+  pvc_name: meep-dataset-v2   
+
+  datagen_job :
+    paths :
+      data : /develop/results
+      image: docker.io/kovaleskilab/meep:v3_lightning
+      template: /develop/code/general_3x3/kubernetes/gen_data/kube_files/templates/job.txt
+      simulations: /develop/results
+      logs: /develop/results/current_logs
+      job_files: /develop/data/job_files
+      #out_sims: /develop/results # this is really a duplicate. can change 'path_simulations' in run_datagen.py (template) if you want to clean this up.
+
+    num_mem_lim: 200G
+    num_mem_req: 200G
+    num_cpus: 32 
+    num_parallel_ops : 2
+
+    kill_time_min: 30
+    kill_tag: datagen 
+
+    num_sims: 831 # this is the ending index
+    start_group_id: 703 
+
+  copy_job :
+    paths :
+     template : /develop/code/general_3x3/kubernetes/rclone/kube_files/templates/job.txt  
+    
+    kill_tag : copy
+  
+  reduce_job :
+    paths :
+      data : '/develop/data'
+      dump : '/develop/results' # this is the dft-volumes pvc
+
